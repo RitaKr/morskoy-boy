@@ -22,12 +22,12 @@ let model = {
 		for (let i = 0; i < this.numShips; i++) {
 			let ship = this.ships[i];
 			let index = ship.locations.indexOf(guess);
-
-			if (index >= 0) {
-				if (ship.hits[index] === "hit") {
+			if (ship.hits[index] === "hit") {
 					alert("Будьте уважніші, ви вже тут були!");
 					return true;
-				}
+			}
+			else if (index >= 0) {
+				
 				ship.hits[index] = "hit";
 				view.displayHit(guess);
 				view.displayMessage("HIT!");
@@ -39,6 +39,7 @@ let model = {
 				return true;
 			}
 		}
+		console.log(view)
 		view.displayMiss(guess);
 		view.displayMessage("You missed.");
 		return false;
@@ -46,7 +47,9 @@ let model = {
 
 //11.01.2021
 	isSunk: function(ship) {
-		for (let i = 0; i < this.shipLength; i++)  {
+		//console.log(ship.hits, ship.hits.length);
+		for (let i = 0; i < ship.hits.length; i++)  {
+			//console.log(ship.hits[i]);
 			if (ship.hits[i] !== "hit") {
 				return false;
 			}
@@ -61,18 +64,24 @@ let model = {
 				locations = this.generateShip();
 			} while (this.collision(locations));
 			this.ships[i].locations = locations;
+			for (l=0; l<locations.length; l++) {
+				//console.log(this.ships, this.ships[i], i);
+				this.ships[i].hits[l]='';
+			}
 			//
 		}
 		console.log("Ships array: ");
+
 		console.log(this.ships);
+		//fill();
 	},
 
 	generateShip: function() {
 		let direction = Math.floor(Math.random() * 2);
-		let length = Math.floor(Math.random() * 3)+1;
+		let length = Math.floor(Math.random() * 4)+1;
+		
 		let row, col;
 		this.shipLength = length;
-		let space=0;
 		/*
 		if (index>0 && index<(this.numShips-1)) {
 			space=1;
@@ -81,19 +90,15 @@ let model = {
 		//function generateLocation() {
 			if (direction === 1) { 
 				// горизонтальная генерация
-				row = Math.floor(Math.random() * this.boardSize)+ +space;
-				col = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1)+ +space);
+				row = Math.floor(Math.random() * this.boardSize);
+				col = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1));
 			} else { 
 				// вертикальная генерация
-				row = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1)+ +space);
+				row = Math.floor(Math.random() * (this.boardSize - this.shipLength + 1));
 				col = Math.floor(Math.random() * this.boardSize);
 			}	
 		//}
 		//generateLocation();
-		
-		if (row>6 || col>6) {
-			
-		}
 
 		let newShipLocations = [];
 		newCol=col;
@@ -108,38 +113,50 @@ let model = {
 				//newShipLocations.push(((row+i) + space) + "" + (col + space));
 			}
 			
-			newShipLocations.push((newRow+ space)+ "" + (newCol + space));
+			newShipLocations.push(newRow+ "" + newCol);
 		}
+		console.log(this.ships);
+		let fits=true;
 		this.ships.forEach((ship, ind) => {
-			if(ship.locations.length!=0){ 
+			//if(ship.locations.length!=0){ 
 				//console.log(index, 'ship is generated');
 				//console.log(ship.locations);
 				ship.locations.forEach((loc, j) => {
-					if(loc!=null && loc!='') {
-						console.log('current locs',newShipLocations, 'previous locs',ship.locations, `location ${j} in prev locs `, loc);
-						newShipLocations.forEach(curLoc => {
-							console.log(`location in cur locs `, curLoc,`location in prev locs `, loc);
-							
+					//if(loc!=null && loc!='') {
+						//console.log('current locs',newShipLocations, 'previous locs',ship.locations, `location ${j} in prev locs `, loc);
+						newShipLocations.forEach((curLoc, curI) => {
+
+							//console.log(`location in cur locs `, curLoc,`location in prev locs `, loc);
+							//console.log('curLoc[0]',+curLoc[0],`loc[0]`, +loc[0], `loc[1]`, +loc[1], `curLoc[1]`, +curLoc[1])
 							if( //[0] - row (A, B, C...), [1] - col (0, 1, 2...)
-								(curLoc[0]==loc[0] && loc[1]==curLoc[1]+1) 
-								|| (curLoc[0]==loc[0] && loc[1]==curLoc[1]-1) 
-								|| (curLoc[1]==loc[1] && loc[0]==curLoc[0]+1)
-								|| (curLoc[1]==loc[1] && loc[0]==curLoc[0]-1)  
-								|| (loc[0]==curLoc[0]+1 && loc[1]==curLoc[1]+1)  
-								|| (loc[0]==curLoc[0]+1 && loc[1]==curLoc[1]-1 )
-								|| (loc[0]==curLoc[0]-1 && loc[1]==curLoc[1]+1)  
-								|| (loc[0]==curLoc[0]-1 && loc[1]==curLoc[1]-1 )  
+								((+curLoc[0]== +loc[0]) && (+loc[1]== +curLoc[1]+1)) 
+								|| ((+curLoc[0]== +loc[0]) && (+loc[1]== +curLoc[1]-1)) 
+								|| ((+curLoc[1]== +loc[1]) && (+loc[0]== +curLoc[0]+1))
+								|| ((+curLoc[1]== +loc[1]) && (+loc[0]== +curLoc[0]-1))  
+								|| ((+loc[0]== +curLoc[0]+1) && (+loc[1]== +curLoc[1]+1))  
+								|| ((+loc[0]== +curLoc[0]+1) && (+loc[1]== +curLoc[1]-1))
+								|| ((+loc[0]== +curLoc[0]-1) && (+loc[1]== +curLoc[1]+1))  
+								|| ((+loc[0]== +curLoc[0]-1) && (+loc[1]== +curLoc[1]-1))  
 								) {
 									console.log(`!!!!!!!!!!misfit ${curLoc} - ${loc}!!!!!!!!!!!!!!!`);
+									fits=false;
 									//this.ships[i].locations = this.generateShip()
-									curLoc = this.generateShip()
-							}
+									//newShipLocations = this.generateShip()
+									do {
+										newShipLocations = this.generateShip()
+									} while (fits);
+							} else fits=true;
+							
 						})
-					}
+					//}
 				})
-		}})
-		console.log(newShipLocations);
+				
+		//}
+	})
+		console.log('newShipLocations',newShipLocations);
+
 		return newShipLocations;
+		
 	},
 /**/
 	collision: function(locations) {
@@ -160,6 +177,13 @@ let view = {
 	displayMessage: function(msg) {
 		let messageArea = document.getElementById("messageArea");
 		messageArea.innerHTML = msg;
+		if (msg=='You missed.') {
+			if (messageArea.classList.remove('hited')) messageArea.classList.remove('hited');
+			messageArea.classList.add('missed');
+		} else {
+			if (messageArea.classList.contains('missed')) messageArea.classList.remove('missed');
+			messageArea.classList.add('hited');
+		}
 	},
 
 	displayHit: function(location) {
@@ -169,7 +193,7 @@ let view = {
 
 	displayMiss: function(location) {
         let cell = document.getElementById(location);
-        console.log(cell)
+        //console.log(cell)
 		cell.setAttribute("class", "miss");
 	}
 
@@ -189,12 +213,13 @@ let controller = {
 		model.ships.forEach(ship => {
 			allShips+=ship.locations.length;
 		})
-		console.log(allShips);
+		//console.log(allShips);
 		if (location) {
 			this.guesses++;
 			let hit = model.fire(location);
+			//console.log(hit)
 			//console.log('ship sunk  ',model.shipsSunk, 'num ships ',model.numShips, 'real num ship ', allShips)
-			if (hit && model.shipsSunk === allShips) {
+			if (hit && model.shipsSunk === model.numShips) {
 					view.displayMessage("You sank all my battleships, in " + this.guesses + " guesses");
 			}
 		}
@@ -254,5 +279,11 @@ function init() {
 	let guessInput = document.getElementById("input");
 	guessInput.onkeypress = handleKeyPress;
 	model.generateShipLocations();
+	
 }
 
+function fill() {
+	for (var fi = 0; fi < 7; fi++)
+	  for (var fj = 0; fj < 7; fj++)
+		controller.processGuess(String.fromCharCode(fi + 65) + "" + fj);
+  }
